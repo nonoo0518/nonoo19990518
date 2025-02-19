@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡通风格聊天室</title>
+    <style>
+        /* 全局样式 */
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background: linear-gradient(to bottom, #87CEEB, #f4f4f4);
+            overflow: hidden;
+        }
+
+        /* 聊天容器 */
+        #chatContainer {
+            width: 520px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            border-radius: 12px;
+        }
+
+        /* 聊天窗口 */
+        #chatScreen {
+            height: 560px;
+            overflow-y: auto;
+            border-radius: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 消息气泡 */
+        .message {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 10px;
+            font-size: 14px;
+            word-wrap: break-word;
+            opacity: 0;
+            transform: scale(0.9);
+            animation: fadeIn 0.3s forwards;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        /* 自己的消息（靠右，蓝色背景） */
+        .user {
+            align-self: flex-end;
+            background: linear-gradient(to right, #4a90e2, #357ABD);
+            color: white;
+            border-top-right-radius: 0;
+            text-align: right;
+        }
+
+        /* 其他用户的消息（靠左，随机背景颜色） */
+        .other {
+            align-self: flex-start;
+            border-top-left-radius: 0;
+        }
+
+        /* 发送者姓名 */
+        .sender {
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        /* 消息动画 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        /* 输入框和按钮 */
+        input {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 5px 0;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input:focus {
+            border-color: #4a90e2;
+        }
+
+        .input-error {
+            border-color: red;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background: linear-gradient(to right, #4caf50, #3e8e41);
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s, transform 0.2s;
+        }
+
+        button:hover {
+            background: linear-gradient(to right, #45a049, #357A38);
+            transform: scale(1.05);
+        }
+    </style>
+</head>
+<body>
+
+    <div id="chatContainer">
+        <div id="chatScreen"></div>
+        <input type="text" id="studentName" placeholder="输入姓名">
+        <input type="text" id="chatInput" placeholder="输入消息">
+        <button id="sendMessage">发送</button>
+    </div>
+
+    <script>
+        const chatScreen = document.getElementById('chatScreen');
+        const studentNameInput = document.getElementById('studentName');
+        const chatInput = document.getElementById('chatInput');
+        const sendMessageButton = document.getElementById('sendMessage');
+
+        // 颜色映射对象
+        const userColors = {};
+
+        // 生成随机颜色（确保不会生成太浅的颜色）
+        function getRandomColor(name) {
+            if (!userColors[name]) {
+                const hue = Math.floor(Math.random() * 360);
+                userColors[name] = `hsl(${hue}, 60%, 70%)`;
+            }
+            return userColors[name];
+        }
+
+        // 发送消息
+        function sendMessage() {
+            const name = studentNameInput.value.trim();
+            const message = chatInput.value.trim();
+
+            if (!name || !message) {
+                highlightEmptyFields();
+                return;
+            }
+
+            createMessageElement(name, message);
+            chatInput.value = ''; // 清空输入框
+            chatInput.focus(); // 重新聚焦
+            chatScreen.scrollTop = chatScreen.scrollHeight; // 滚动到底部
+        }
+
+        // 创建消息元素
+        function createMessageElement(name, message) {
+            const messageDiv = document.createElement('div');
+            messageDiv.className = name === '我' ? 'message user' : 'message other';
+
+            if (name !== '我') {
+                messageDiv.style.background = getRandomColor(name);
+            }
+
+            messageDiv.innerHTML = `<span class="sender">${name}:</span><span class="text">${message}</span>`;
+            chatScreen.appendChild(messageDiv);
+        }
+
+        // 按 Enter 键发送消息
+        chatInput.addEventListener('keypress', (event) => {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        });
+
+        // 按钮点击发送
+        sendMessageButton.addEventListener('click', sendMessage);
+
+        // 高亮未填写的输入框
+        function highlightEmptyFields() {
+            [studentNameInput, chatInput].forEach(input => {
+                if (!input.value.trim()) {
+                    input.classList.add('input-error');
+                    setTimeout(() => input.classList.remove('input-error'), 1000);
+                }
+            });
+        }
+    </script>
+
+</body>
+</html>
